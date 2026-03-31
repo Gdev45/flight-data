@@ -20,7 +20,7 @@ Get live flight information right from your terminal with an easy-to-use CLI.
 ### Recommended: Using pipx (isolated CLI)
 
 ```bash
-pipx install git+https://github.com/<your-username>/flight-data.git
+pipx install git+https://github.com/Gdev45/flight-data.git
 
 ```
 ## Run using
