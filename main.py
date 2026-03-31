@@ -1,4 +1,5 @@
-# flight_data_terminal_boxed.py
+#!/usr/bin/env python3
+# main.py
 import requests
 from datetime import datetime, timezone
 from rich.console import Console
@@ -75,15 +76,6 @@ def main():
             console.print("[green]Goodbye![/green]")
             break
         search_flights_by_callsign(query)
-
-if __name__ == "__main__":
-    main()
-
-
-    #!/usr/bin/env python3
-def main():
-    print("Flight Data CLI running!")
-    # your existing code here
 
 if __name__ == "__main__":
     main()
