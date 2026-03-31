@@ -1,14 +1,11 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "flight-data"
 version = "0.1.0"
 description = "Terminal tool to fetch and display flight data"
 requires-python = ">=3.8"
 dependencies = [
-    "requests"   # or any other packages you need
+    "requests",
+    "rich"
 ]
 
 [project.scripts]
