@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # main.py
+
 import requests
 from datetime import datetime, timezone
 from rich.console import Console
@@ -10,72 +11,85 @@ from rich.text import Text
 
 console = Console()
 
-def display_header():
-    header_text = Text("✈ Flight Data — Terminal Edition ✈", justify="center", style="bold white on blue")
-    panel = Panel(header_text, expand=True, border_style="bright_magenta", title="[bold yellow]Welcome![/bold yellow]")
-    console.print(panel)
 
-def search_flights_by_callsign(query):
+def header():
+    txt = Text(
+        "✈ Flight Data — Terminal Edition ✈",
+        justify="center",
+        style="bold white on blue"
+    )
+    console.print(Panel(txt, border_style="bright_magenta", title="Welcome"))
+
+
+def find_flights(q):
     url = "https://opensky-network.org/api/states/all"
+
     try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-    except Exception as e:
-        console.print(f"[red]Error fetching data:[/red] {e}")
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+    except Exception as err:
+        console.print(f"[red]Failed to fetch data:[/red] {err}")
         return
 
-    matches = []
-    for state in data.get("states", []):
-        callsign = (state[1] or "").strip()
-        icao24 = state[0]
-        origin_country = state[2]
-        lat = state[6]
-        lon = state[5]
-        altitude = state[7]
-        last_seen = state[4]
+    results = []
 
-        if callsign and query.upper() in callsign.upper():
-            last_seen_time = datetime.fromtimestamp(last_seen, timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-            matches.append({
-                "Callsign": callsign,
-                "ICAO24": icao24,
-                "Country": origin_country,
-                "Altitude (m)": altitude if altitude else "N/A",
-                "Last Seen": last_seen_time,
-                "Latitude": lat,
-                "Longitude": lon
-            })
+    for s in data.get("states", []):
+        callsign = (s[1] or "").strip()
 
-    if not matches:
-        console.print(f"[yellow]No airborne flights found for callsign containing '{query}'.[/yellow]")
+        if not callsign or q.upper() not in callsign.upper():
+            continue
+
+        try:
+            last_seen = datetime.fromtimestamp(s[4], timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        except:
+            last_seen = "N/A"
+
+        results.append({
+            "callsign": callsign,
+            "icao": s[0],
+            "country": s[2],
+            "alt": s[7] if s[7] else "N/A",
+            "seen": last_seen,
+            "lat": s[6],
+            "lon": s[5],
+        })
+
+    if not results:
+        console.print(f"[yellow]No flights found for '{q}'[/yellow]")
         return
 
-    table = Table(title=f"Airborne Flights Matching '{query}'", show_lines=True)
-    for col in ["Callsign", "ICAO24", "Country", "Altitude (m)", "Last Seen", "Latitude", "Longitude"]:
-        table.add_column(col, justify="center")
-    
-    for f in matches:
+    table = Table(title=f"Flights matching '{q}'", show_lines=True)
+
+    cols = ["Callsign", "ICAO24", "Country", "Altitude (m)", "Last Seen", "Latitude", "Longitude"]
+    for c in cols:
+        table.add_column(c, justify="center")
+
+    for f in results:
         table.add_row(
-            f["Callsign"],
-            f["ICAO24"],
-            f["Country"],
-            str(f["Altitude (m)"]),
-            f["Last Seen"],
-            str(f["Latitude"]),
-            str(f["Longitude"])
+            f["callsign"],
+            f["icao"],
+            f["country"],
+            str(f["alt"]),
+            f["seen"],
+            str(f["lat"]),
+            str(f["lon"]),
         )
 
     console.print(table)
 
+
 def main():
-    display_header()
+    header()
+
     while True:
-        query = Prompt.ask("\nEnter callsign (or part of it) or 'exit' to quit")
-        if query.lower() == "exit":
-            console.print("[green]Goodbye![/green]")
+        q = Prompt.ask("\nCallsign (or 'exit')")
+        if q.lower() == "exit":
+            console.print("[green]bye[/green]")
             break
-        search_flights_by_callsign(query)
+
+        find_flights(q)
+
 
 if __name__ == "__main__":
     main()
