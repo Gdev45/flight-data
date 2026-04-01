@@ -28,3 +28,5 @@ pipx install git+https://github.com/Gdev45/flight-data.git
 ```bash
 flight-data
 ```
+
+<img width="1908" height="113" alt="Screenshot from 2026-04-01 10-02-32" src="https://github.com/user-attachments/assets/319c6b78-e623-4e59-9c5d-12cf0584e64b" />
